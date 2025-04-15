@@ -115,11 +115,27 @@ def spiderum_login():
         # Chờ đợi trang tải xong
         random_sleep(2, 5)
         
-        # Cuộn trang một chút như người dùng thực
-        driver.execute_script("window.scrollBy(0, 300);")
-        random_sleep(2, 4)
-        driver.execute_script("window.scrollBy(0, 300);")
-        random_sleep(1, 3)
+        # Tìm nút lọc bài viết mới
+        filter_button = driver.find_element(By.XPATH, "//button[@aria-label='Filter new posts']")
+        random_sleep(0.5, 1)
+        # Cuộn đến phần tử một cách mượt mà
+        driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", filter_button)
+        random_sleep(1, 2)
+        # Di chuyển chuột đến nút và click
+        action.move_to_element(filter_button).perform()
+        random_sleep(0.5, 1)
+        filter_button.click()
+        random_sleep(3,4)
+        scroll_end = driver.find_element(By.XPATH, '//div[contains(@class, "pagination")]/ul/li[last()]/a[@href="javascript:;"]')
+        # Cuộn để phần tử ở giữa màn hình
+        # Cuộn 10 lần để mô phỏng hành vi người dùng thực
+        for i in range(8):
+            # Cuộn đến phần tử scroll_end một cách mượt mà
+            driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", scroll_end)
+            random_sleep(0.3, 0.8)  # Thêm độ trễ giữa các lần cuộn
+        
+        random_sleep(2,3)
+        scroll_end.click()
 
     except Exception as e:
         print(f"Đã xảy ra lỗi: {e}")
