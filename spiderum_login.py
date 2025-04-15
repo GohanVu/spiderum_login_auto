@@ -79,15 +79,22 @@ def spiderum_login():
         random_sleep(1, 2.5)
         
         # Tìm nút tiếp tục và nhấp vào
-        login_continue_list = driver.find_elements(By.XPATH, "//a[@href='https://spiderum.com']")
-        login_continue_button = login_continue_list[1]
-        
-        # Di chuyển chuột đến nút tiếp tục
-        action.move_to_element(login_continue_button).perform() 
-        random_sleep(0.5, 1.5)
-        
-        login_continue_button.click()
-        random_sleep(1.5, 3)
+        try:
+            login_continue_list = driver.find_elements(By.XPATH, "//a[@href='https://spiderum.com']")
+            if login_continue_list:
+                login_continue_button = login_continue_list[0]  # Lấy phần tử đầu tiên
+                
+                # Di chuyển chuột đến nút tiếp tục
+                action.move_to_element(login_continue_button).perform() 
+                random_sleep(0.5, 1.5)
+                
+                login_continue_button.click()
+                random_sleep(1.5, 3)
+            else:
+                print("Không tìm thấy nút tiếp tục, tiếp tục với các bước tiếp theo")
+        except Exception as e:
+            print(f"Lỗi khi xử lý nút tiếp tục: {e}")
+            print("Tiếp tục với các bước tiếp theo")
         
         # Đóng dialog nếu xuất hiện
         close_dialog_button = driver.find_element(By.XPATH, "//div[@id='dialog']//i[contains(@class, 'close-button')]")

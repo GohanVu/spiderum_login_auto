@@ -42,12 +42,15 @@ def instagram_login():
 
         # Tìm và điền thông tin đăng nhập
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, "//input[@name='username']"))
+            EC.presence_of_element_located((By.XPATH, "//input[@name='username'] | //input[@type='text']"))
         )
-        
         # Tìm các trường input
-        username_input = driver.find_element(By.XPATH, "//input[@name='username']")
-        password_input = driver.find_element(By.XPATH, "//input[@name='password']")
+        inputs_username = driver.find_elements(By.XPATH, "//input[@name='username'] | //input[@type='text']")
+        inputs_password = driver.find_elements(By.XPATH, "//input[@name='password'] | //input[@type='password']")
+        
+        # Lấy ô nhập tên đăng nhập và mật khẩu
+        username_input = inputs_username[0]
+        password_input = inputs_password[0]
         random_sleep(0.5, 1.5)
         # Điền thông tin đăng nhập
         type_like_human(username_input, username)
@@ -83,6 +86,47 @@ def instagram_login():
             print("Đăng nhập thành công!")
         except:
             print("Đăng nhập không thành công!")
+            
+        # Chờ đợi trang tải xong
+        random_sleep(2, 3)
+        
+        #Tìm thanh tìm kiếm và nhập từ khóa tìm kiếm
+        search_input = driver.find_element(By.XPATH, "//div[@class='x1iyjqo2 xh8yej3']/div[2]")
+        random_sleep(0.5, 1)
+        search_input.click()
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//input[@type='text']"))
+        )
+        search_input = driver.find_element(By.XPATH, "//input[@type='text']")
+        random_sleep(0.5, 1)
+        type_like_human(search_input, "ufc")
+        random_sleep(0.5, 1)
+        
+        # Chờ đợi kết quả tìm kiếm xuất hiện
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'x6s0dn4')]"))
+        )
+        random_sleep(1, 2)
+        search_output_lists = driver.find_elements(By.XPATH, "//div[contains(@class, 'x6s0dn4')]//div[contains(@class, 'x9f619')]//a | //div[contains(@class, 'x6s0dn4')]/div[contains(@class, 'x9f619') and contains(@class, 'x78zum5')]/a[@role='link']")
+        random_sleep(0.5, 1)
+        target_search_output = search_output_lists[0]
+        random_sleep(0.5, 1)
+        target_search_output.click()
+        random_sleep(0.5, 1)
+        
+        # Cuộn xuống 3 lần
+        for i in range(3):
+            # Cuộn xuống 1000px mỗi lần
+            driver.execute_script("window.scrollBy(0, 1000);")
+            random_sleep(0.8, 1.5)
+            
+        # Cuộn lên 3 lần
+        for i in range(3):
+            # Cuộn lên 1000px mỗi lần 
+            driver.execute_script("window.scrollBy(0, -1000);")
+            random_sleep(0.8, 1.5)
+        
+            
         
         
         
