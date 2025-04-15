@@ -9,6 +9,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 import time
 import random
 import getpass
+import pyotp
 
 def instagram_login():
     # Thiết lập trình điều khiển Chrome với các tùy chọn
@@ -28,99 +29,63 @@ def instagram_login():
         driver = webdriver.Chrome(options=chrome_options)
         driver.maximize_window()  # Mở cửa sổ toàn màn hình như người dùng thực
         
-        # Mở trang đăng nhập Spiderum
-        driver.get("https://auth.spiderum.com/sso")
-        # Chờ ngẫu nhiên từ 1-3 giây như người dùng đang xem trang
-        random_sleep(1, 3)
-
-        # Tìm các trường đăng nhập
-        inputs_username = driver.find_elements(By.XPATH, "//input[@id='name']")
-        inputs_password = driver.find_elements(By.XPATH, "//input[@id='password']")
-
-        # Lấy ô nhập tên đăng nhập và mật khẩu
-        username_input = inputs_username[0]
-        password_input = inputs_password[0]
+        # Mở trang đăng nhập Instagram
+        driver.get("https://www.instagram.com/")
         
-        # Thông tin đăng nhập cố định
-        username = "hoangdz1811@gmail.com"
-        password = "Hoang@123"
+        # Tạo mã OTP từ mã 2FA trước khi bắt đầu quá trình đăng nhập
+        totp = pyotp.TOTP("43S6NNTF4FCDCN3NDSV4JBCZ5SZDYYCQ")
+        six_digit_code = totp.now()
 
-        # Mô phỏng người dùng di chuyển chuột đến ô username
-        action = ActionChains(driver)
-        action.move_to_element(username_input).perform()
+        # Thông tin đăng nhập
+        username = "itein0rqtnrfnye539"
+        password = "AUcVIt3f1232"
+
+        # Tìm và điền thông tin đăng nhập
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//input[@name='username']"))
+        )
+        
+        # Tìm các trường input
+        username_input = driver.find_element(By.XPATH, "//input[@name='username']")
+        password_input = driver.find_element(By.XPATH, "//input[@name='password']")
         random_sleep(0.5, 1.5)
-        
-        # Điền tên đăng nhập với tốc độ ngẫu nhiên
+        # Điền thông tin đăng nhập
         type_like_human(username_input, username)
-        
-        # Di chuyển đến ô mật khẩu như người dùng thực
-        action.move_to_element(password_input).perform()
         random_sleep(0.5, 1.5)
-        
-        # Điền mật khẩu với tốc độ ngẫu nhiên
         type_like_human(password_input, password)
         
-        # Tạm dừng ngẫu nhiên trước khi nhấn đăng nhập
-        random_sleep(0.8, 2)
-        
-        # Tìm và nhấp vào nút đăng nhập
-        login_button = driver.find_element(By.XPATH, "//input[@id='submit-btn']")
-        
-        # Di chuyển chuột đến nút đăng nhập
-        action.move_to_element(login_button).perform()
-        random_sleep(0.3, 1)
-        
-        login_button.click()
-
-        # Chờ đợi phần tử xác nhận đã đăng nhập thành công
-        username_input = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "a[href='/logout']"))
+        # Nhấn nút đăng nhập
+        login_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']"))
         )
-        random_sleep(1, 2.5)
-        
-        # Tìm nút tiếp tục và nhấp vào
-        login_continue_list = driver.find_elements(By.XPATH, "//a[@href='https://spiderum.com']")
-        login_continue_button = login_continue_list[1]
-        
-        # Di chuyển chuột đến nút tiếp tục
-        action.move_to_element(login_continue_button).perform() 
         random_sleep(0.5, 1.5)
+        login_button.click()
         
-        login_continue_button.click()
-        random_sleep(1.5, 3)
-        
-        # Đóng dialog nếu xuất hiện
-        close_dialog_button = driver.find_element(By.XPATH, "//div[@id='dialog']//i[contains(@class, 'close-button')]")
-        action.move_to_element(close_dialog_button).perform()
-        random_sleep(0.3, 1)
-        close_dialog_button.click()
-        random_sleep(1, 2)
-        
-        # Nhấp lại nút đăng nhập
-        reclick_button = driver.find_element(By.XPATH, "//span[contains(text(), 'Đăng nhập')]/parent::a")
-        action.move_to_element(reclick_button).perform()
+        # Chờ và điền mã xác thực
+        verification_input = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//input[@name='verificationCode']"))
+        )
         random_sleep(0.5, 1.5)
-        reclick_button.click()
+        type_like_human(verification_input, six_digit_code)
         
-        # Thêm thời gian chờ ở đây (sửa lỗi thiếu time.sleep())
-        random_sleep(1, 2)
-        
-        # Bỏ qua hướng dẫn
-        skip_list = driver.find_elements(By.XPATH, "//button[contains(@class, 'button-secondary') and contains(text(), 'Bỏ qua hướng dẫn')] ")
-        skip_button = skip_list[0]
-        action.move_to_element(skip_button).perform()
+        # Nhấn nút xác nhận
+        confirm_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Confirm')]"))
+        )
         random_sleep(0.5, 1.5)
-        skip_button.click()
+        confirm_button.click()
         
-        # Chờ đợi trang tải xong
-        random_sleep(2, 5)
+        # Chờ đăng nhập thành công
+        try:
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, "//div[contains(@style, 'transform: translateX(0px)')]"))
+            )
+            print("Đăng nhập thành công!")
+        except:
+            print("Đăng nhập không thành công!")
         
-        # Cuộn trang một chút như người dùng thực
-        driver.execute_script("window.scrollBy(0, 300);")
-        random_sleep(2, 4)
-        driver.execute_script("window.scrollBy(0, 300);")
-        random_sleep(1, 3)
-
+        
+        
     except Exception as e:
         print(f"Đã xảy ra lỗi: {e}")
     
@@ -144,10 +109,9 @@ def type_like_human(element, text):
     """Gõ văn bản với tốc độ ngẫu nhiên như người thật"""
     for char in text:
         element.send_keys(char)
-        # Tạm dừng ngẫu nhiên giữa các ký tự 0.05-0.2s
-        time.sleep(random.uniform(0.05, 0.2))
+        time.sleep(random.uniform(0.05, 0.15))  # Giảm thời gian chờ giữa các ký tự
 
 if __name__ == "__main__":
-    print("Ví dụ Tự động đăng nhập Spiderum")
+    print("Ví dụ Tự động đăng nhập Instagram")
     print("----------------------------------")
-    instagram_login() 
+    instagram_login()
