@@ -10,7 +10,7 @@ import time
 import random
 import getpass
 
-def instagram_login():
+def spiderum_login():
     # Thiết lập trình điều khiển Chrome với các tùy chọn
     # Options cho phép bạn tùy chỉnh cách Chrome hoạt động
     chrome_options = Options()
@@ -150,4 +150,4 @@ def type_like_human(element, text):
 if __name__ == "__main__":
     print("Ví dụ Tự động đăng nhập Spiderum")
     print("----------------------------------")
-    instagram_login() 
+    spiderum_login() 
